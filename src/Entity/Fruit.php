@@ -4,9 +4,10 @@ namespace App\Entity;
 
 use App\Repository\FruitRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 #[ORM\Entity(repositoryClass: FruitRepository::class)]
-class Fruit
+class Fruit implements JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -166,5 +167,24 @@ class Fruit
         $this->isFavorite = $isFavorite;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return array(
+            "id" => $this->id,
+            "name" => $this->name,
+            "family" => $this->family,
+            "genus" => $this->genus,
+            "order" => $this->forder,
+            "nutritions" => array (
+                "calories" => $this->calories,
+                "carbohydrates" => $this->carbohydrates,
+                "fat" => $this->fat,
+                "protein" => $this->protein,
+                "sugar" => $this->sugar,
+            ),
+            "isFavorite" => $this->isFavorite,
+        );
     }
 }

@@ -39,28 +39,30 @@ class FruitRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Fruit[] Returns an array of Fruit objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('f')
-//            ->andWhere('f.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('f.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+   /**
+    * @return Fruit[] Returns an array of Fruit objects
+    */
+   public function findByNameAndFamily($name, $family, $limit, $offset): array
+   {
+        $qb = $this->createQueryBuilder('f');
+        $countQb = $this->createQueryBuilder('f')->select('count(f.id)');
+        if ($name) {
+            $qb->andWhere('f.name LIKE :name')->setParameter('name', '%'.$name.'%');
+            $countQb->andWhere('f.name LIKE :name')->setParameter('name', '%'.$name.'%');
+        }
 
-//    public function findOneBySomeField($value): ?Fruit
-//    {
-//        return $this->createQueryBuilder('f')
-//            ->andWhere('f.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($family) {
+            $qb->andWhere('f.family LIKE :family')->setParameter('family', '%'.$family.'%');
+            $countQb->andWhere('f.family LIKE :family')->setParameter('family', '%'.$family.'%');
+        }
+
+        if ($limit) $qb->setMaxResults($limit);
+
+        if ($offset) $qb->setFirstResult($offset);
+
+        return [
+            $countQb->getQuery()->getSingleScalarResult(),
+            $qb->getQuery()->getResult()
+        ];
+   }
 }
