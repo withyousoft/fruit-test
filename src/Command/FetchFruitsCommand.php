@@ -7,6 +7,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 // the name of the command is what users type after "php bin/console"
 #[AsCommand(
@@ -20,6 +22,7 @@ class FetchFruitsCommand extends Command
 
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private MailerInterface $mailer
     ){
         parent::__construct();
     }
@@ -55,6 +58,7 @@ class FetchFruitsCommand extends Command
             $fruitEntity->setFat(($fruit['nutritions']['fat']));
             $fruitEntity->setProtein(($fruit['nutritions']['protein']));
             $fruitEntity->setSugar(($fruit['nutritions']['sugar']));
+            $fruitEntity->setIsFavorite(false);
     
             $this->entityManager->persist($fruitEntity);
         }
@@ -63,6 +67,14 @@ class FetchFruitsCommand extends Command
     
         $output->writeln('All fruits saved into local DB');
 
+
+        $email = (new Email())
+            ->from('from@example.com')
+            ->to('test@gmail.com')
+            ->subject('Fruits saved to local DB')
+            ->text('All fruits have been saved to the local database.');
+
+        $this->mailer->send($email);
 
         return Command::SUCCESS;
     }
